@@ -7,6 +7,8 @@ print("Scan starting…")
 
 folder = Path("sample_target")
 findings = []
+
+secret_keywords = ["api_key", "secret", "password", "token", "private_key", "aws_access_key"]
 secret_findings = []
 
 # Main scan loop runs every security check on each file
@@ -18,8 +20,11 @@ for item in folder.rglob("*"):
             text = item.read_text()
         except:
             continue
-        if "API_KEY" in text:
-            secret_findings.append(item)
+        for keyword in secret_keywords:
+            if keyword in text.lower():
+                secret_findings.append(item)
+                break
+
 
 
 # Reports results for each check
