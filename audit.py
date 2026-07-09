@@ -6,6 +6,42 @@ print("---- Local Security Audit Tool - Version 1.0 ----")
 print("                 Scan starting…\n")
 
 
+def check_env_file(item):
+    if item.name == ".env":
+        return item
+    return None
+
+
+def check_permissions(item):
+    if not item.is_file():
+        return None
+    if item.stat().st_mode & stat.S_IWOTH:
+        return item
+    return None
+
+
+def check_filenames(item, keywords):
+    for keyword in keywords:
+        if keyword in item.name.lower():
+            return item
+        
+    if item.name.endswith((".key", ".pem")):
+        return item
+    return None
+
+
+def check_for_secrets(item, keywords):
+    try:
+        text = item.read_text()
+    except:
+        return None
+    
+    for keyword in keywords:
+        if keyword in text.lower():
+            return item
+    return None
+
+
 folder = Path("sample_target")
 
 findings = []
@@ -15,37 +51,30 @@ permission_findings = []
 filename_keywords = ["id_rsa", "password.txt", "passwords.txt", "backup.sql"]
 filename_findings = []
 
-# Main scan loop runs every security check on each file
+
+
+# Walking items in folder
 for item in folder.rglob("*"):
-    if item.name == ".env":    
-        findings.append(item)
+    
+    # Scan for .env files
+    env_result = check_env_file(item)
+    if env_result:
+        findings.append(env_result)
 
-    if item.is_file():
-        try:
-            text = item.read_text()
-        except:
-            continue
+    # Scan for secret keywords
+    secret_result = check_for_secrets(item, secret_keywords)
+    if secret_result:
+        secret_findings.append(secret_result)
 
-        # Scan text for any secret keyword, break on first match
-        for keyword in secret_keywords:
-            if keyword in text.lower():
-                secret_findings.append(item)
-                break
+    # Scan for vulnerable file permissions            
+    permission_result = check_permissions(item)
+    if permission_result:
+        permission_findings.append(permission_result)
 
-        # Scan for vulnerable file permissions            
-        mode = item.stat().st_mode
-        if mode & stat.S_IWOTH:
-            permission_findings.append(item)
-
-        # Scan for suspicious filenames
-        for keyword in filename_keywords:
-            if keyword in item.name.lower():
-                filename_findings.append(item)
-                break
-
-        if item.name.endswith((".key", ".pem")):
-             filename_findings.append(item)
-
+    # Scan for suspicious filenames
+    filename_result = check_filenames(item, filename_keywords)
+    if filename_result:
+        filename_findings.append(filename_result)
 
 # Reports results for each check
 if not findings:
