@@ -42,6 +42,25 @@ def check_for_secrets(item, keywords):
     return None
 
 
+def check_dependencies(item):
+    if item.name != "requirements.txt":
+        return None
+    
+    try:
+        text = item.read_text()
+    except:
+        return None
+    
+    for line in text.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+
+        if "==" not in line and ">=" not in line and "<=" not in line and "~=" not in line:
+            return item
+    return None
+
+
 folder = Path("sample_target")
 
 findings = []
@@ -50,7 +69,7 @@ secret_findings = []
 permission_findings = []
 filename_keywords = ["id_rsa", "password.txt", "passwords.txt", "backup.sql"]
 filename_findings = []
-
+dependency_findings = []
 
 
 # Walking items in folder
@@ -76,6 +95,12 @@ for item in folder.rglob("*"):
     if filename_result:
         filename_findings.append(filename_result)
 
+    # Flag dependencies with no version specifier
+    dependency_result = check_dependencies(item)
+    if dependency_result:
+        dependency_findings.append(dependency_result)
+
+
 # Reports results for each check
 if not findings:
     print("No exposed .env files found.")
@@ -100,3 +125,9 @@ if not filename_findings:
 else:
     for finding in filename_findings:
         print(f"Vulnerable filename detected: {finding}")
+
+if not dependency_findings:
+    print("No flagged dependencies found.")
+else:
+    for finding in dependency_findings:
+        print(f"Dependency with no version specifier detected: {finding}")
