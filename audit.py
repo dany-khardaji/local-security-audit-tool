@@ -1,3 +1,4 @@
+import argparse
 from pathlib import Path
 
 from checks.env_files import check_env_file
@@ -6,11 +7,17 @@ from checks.filenames import check_filenames
 from checks.secrets import check_for_secrets
 from checks.dependencies import check_dependencies
 
+
+parser = argparse.ArgumentParser(description="Scan a folder for security issues")
+parser.add_argument("target", help="the folder to scan")
+args = parser.parse_args()
+
+
 print("---- Local Security Audit Tool - Version 1.0 ----")
 print("                 Scan starting…\n")
 
 
-folder = Path("sample_target")
+folder = Path(args.target)
 
 findings = []
 secret_keywords = ["api_key", "secret", "password", "token", "private_key", "aws_access_key"]
