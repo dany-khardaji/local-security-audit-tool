@@ -1,64 +1,13 @@
 from pathlib import Path
-import stat
 
+from checks.env_files import check_env_file
+from checks.permissions import check_permissions
+from checks.filenames import check_filenames
+from checks.secrets import check_for_secrets
+from checks.dependencies import check_dependencies
 
 print("---- Local Security Audit Tool - Version 1.0 ----")
 print("                 Scan starting…\n")
-
-
-def check_env_file(item):
-    if item.name == ".env":
-        return item
-    return None
-
-
-def check_permissions(item):
-    if not item.is_file():
-        return None
-    if item.stat().st_mode & stat.S_IWOTH:
-        return item
-    return None
-
-
-def check_filenames(item, keywords):
-    for keyword in keywords:
-        if keyword in item.name.lower():
-            return item
-        
-    if item.name.endswith((".key", ".pem")):
-        return item
-    return None
-
-
-def check_for_secrets(item, keywords):
-    try:
-        text = item.read_text()
-    except:
-        return None
-    
-    for keyword in keywords:
-        if keyword in text.lower():
-            return item
-    return None
-
-
-def check_dependencies(item):
-    if item.name != "requirements.txt":
-        return None
-    
-    try:
-        text = item.read_text()
-    except:
-        return None
-    
-    for line in text.splitlines():
-        line = line.strip()
-        if not line:
-            continue
-
-        if "==" not in line and ">=" not in line and "<=" not in line and "~=" not in line:
-            return item
-    return None
 
 
 folder = Path("sample_target")
