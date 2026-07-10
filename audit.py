@@ -8,6 +8,16 @@ from checks.secrets import check_for_secrets
 from checks.dependencies import check_dependencies
 
 
+# Function to print scan findings
+def print_findings(findings, none_message, detected_message):
+    if not findings:
+        print(none_message)
+    else:
+        for finding in findings:
+            print(f"{detected_message}: {finding}")
+
+
+# Read the target folder from the command line
 parser = argparse.ArgumentParser(description="Scan a folder for security issues")
 parser.add_argument("target", help="the folder to scan")
 args = parser.parse_args()
@@ -19,7 +29,7 @@ print("                 Scan starting…\n")
 
 folder = Path(args.target)
 
-findings = []
+env_findings = []
 secret_keywords = ["api_key", "secret", "password", "token", "private_key", "aws_access_key"]
 secret_findings = []
 permission_findings = []
@@ -30,11 +40,11 @@ dependency_findings = []
 
 # Walking items in folder
 for item in folder.rglob("*"):
-    
+
     # Scan for .env files
     env_result = check_env_file(item)
     if env_result:
-        findings.append(env_result)
+        env_findings.append(env_result)
 
     # Scan for secret keywords
     secret_result = check_for_secrets(item, secret_keywords)
@@ -58,32 +68,12 @@ for item in folder.rglob("*"):
 
 
 # Reports results for each check
-if not findings:
-    print("No exposed .env files found.")
-else:
-    for finding in findings:
-        print(f"Exposed .env file detected: {finding}")
+print_findings(env_findings, "No exposed .env files found.", "Exposed .env file detected")
+print_findings(secret_findings, "No secrets found.", "Possible secret detected")
+print_findings(permission_findings, "No vulnerable file permissions found.", "Vulnerable file permission detected")
+print_findings(filename_findings, "No vulnerable filenames found.", "Vulnerable filename detected")
+print_findings(dependency_findings, "No flagged dependencies found.", "Dependency with no version specifier detected")
 
-if not secret_findings:
-    print("No secrets found.")
-else:
-    for finding in secret_findings:
-        print(f"Possible secret detected: {finding}")
 
-if not permission_findings:
-    print("No vulnerable file permissions found.")
-else:
-    for finding in permission_findings:
-        print(f"Vulnerable file permission detected: {finding}")
 
-if not filename_findings:
-    print("No vulnerable filenames found.")
-else:
-    for finding in filename_findings:
-        print(f"Vulnerable filename detected: {finding}")
 
-if not dependency_findings:
-    print("No flagged dependencies found.")
-else:
-    for finding in dependency_findings:
-        print(f"Dependency with no version specifier detected: {finding}")
