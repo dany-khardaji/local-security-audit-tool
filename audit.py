@@ -26,9 +26,10 @@ args = parser.parse_args()
 print("---- Local Security Audit Tool - Version 1.0 ----")
 print("                 Scan starting…\n")
 
-
+# Set the target folder to scan
 folder = Path(args.target)
-
+ 
+# Initialize lists to hold findings for each check
 env_findings = []
 secret_keywords = ["api_key", "secret", "password", "token", "private_key", "aws_access_key"]
 secret_findings = []
@@ -40,7 +41,8 @@ dependency_findings = []
 
 # Walking items in folder
 for item in folder.rglob("*"):
-
+    if ".git" in item.parts:
+            continue
     # Scan for .env files
     env_result = check_env_file(item)
     if env_result:
