@@ -1,6 +1,6 @@
 # local-security-audit-tool
 **Version 1.0**
-This is a local-only command-line tool that scans a folder for common security mistakes such as exposed secrets, sensitive files and risky permissions. Intended for use before you push your code to GitHub.
+Local, zero-dependency, command-line tool that scans a folder for common security mistakes such as exposed secrets, sensitive files and risky permissions. Intended for use before you push your code to GitHub.
 
 ## Why I built it
 Wanted a tool to make sure that I don't accidentally commit any secrets or sensitive information. This tool will help me scan my project directory before pushing to GitHub.
