@@ -7,7 +7,7 @@ Wanted a tool to make sure that I don't accidentally commit any secrets or sensi
 
 ## What it checks for
 - Exposed `.env` files
-- Secrets in file contents (keyword-based and regex for aws keys)
+- Secrets in file contents (keyword-based and AWS keys, git tokens)
 - World-writable file permissions
 - Suspicious filenames (`id_rsa`, `.key`, etc.)
 - Unpinned dependencies in `requirements.txt`
