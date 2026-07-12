@@ -41,8 +41,11 @@ dependency_findings = []
 
 # Walking items in folder
 for item in folder.rglob("*"):
+
+    # Skip .git directory to avoid false positives
     if ".git" in item.parts:
-            continue
+        continue
+
     # Scan for .env files
     env_result = check_env_file(item)
     if env_result:
